@@ -45,6 +45,12 @@ pub fn part1() {
     println!("day3part1: {}", result);
 }
 
+// When calculating the CO2 number: what happens if all of the digits in the current column are the
+// same? For example:
+//   0
+//   0
+// The least common number is 0, which with the algorithm below would result in filtering the list
+// down to no elements. Should 0 just be the least common, instead of inverting to 1?
 pub fn part2() {
     let filename = "./input/day3.txt";
     let mut oxygen_input = util::read_strings(filename);
@@ -75,7 +81,9 @@ pub fn part2() {
             }
         }
 
-        oxygen_input = new_input;
+        if new_input.len() > 0 {
+            oxygen_input = new_input;
+        }
         if oxygen_input.len() == 1 {
             break;
         }
@@ -104,7 +112,9 @@ pub fn part2() {
             }
         }
 
-        co2_input = new_input;
+        if new_input.len() > 0 {
+            co2_input = new_input;
+        }
         if co2_input.len() == 1 {
             break;
         }
