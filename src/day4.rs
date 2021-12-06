@@ -6,34 +6,16 @@ pub fn part1() {
     let filename = "./input/day4.txt";
     let bingo_game = read_bingo(filename);
 
-    for n in bingo_game.numbers {
-        let mut winning_scores: Vec<i32> = Vec::new();
-        for b in &bingo_game.boards {
-            let won = b.receive_number(n);
-            if won {
-                let score = b.calculate_score(n);
-                winning_scores.push(score);
-            }
-        }
-
-        // It isn't stated in the problem, but there might be ties; find the highest score
-        if winning_scores.len() > 0 {
-            winning_scores.sort();
-            let result = *winning_scores.last().unwrap();
-            println!("day4part1: {}", result);
-            return;
-        }
-    }
-
-    let result = "no winning board";
+    let result = bingo_game.first_winner_score();
 
     println!("day4part1: {}", result);
 }
 
 pub fn part2() {
     let filename = "./input/day4.txt";
+    let bingo_game = read_bingo(filename);
 
-    let result = "unimpl";
+    let result = bingo_game.last_winner_score();
 
     println!("day4part2: {}", result);
 }
@@ -72,6 +54,7 @@ where
         let mut board = BingoBoard {
             number_grid,
             marked_grid,
+            won: Cell::new(false),
         };
         boards.push(board)
     }
@@ -84,9 +67,62 @@ struct BingoGame {
     pub boards: Vec<BingoBoard>,
 }
 
+impl BingoGame {
+    fn first_winner_score(&self) -> i32 {
+        for n in &self.numbers {
+            let mut winning_scores: Vec<i32> = Vec::new();
+
+            for b in &self.boards {
+                let won = b.receive_number(*n);
+                if won {
+                    let score = b.calculate_score(*n);
+                    winning_scores.push(score);
+                }
+            }
+
+            // It isn't stated in the problem, but there might be ties; find the highest score
+            if winning_scores.len() > 0 {
+                winning_scores.sort();
+                let result = *winning_scores.last().unwrap();
+                return result;
+            }
+        }
+
+        // If this is returned, there was no winner (this won't happen)
+        -1
+    }
+
+    fn last_winner_score(&self) -> i32 {
+        let mut winning_scores: Vec<i32> = Vec::new();
+
+        for n in &self.numbers {
+            for b in &self.boards {
+                if b.won.get() {
+                    continue;
+                }
+
+                let won = b.receive_number(*n);
+                if won {
+                    let score = b.calculate_score(*n);
+                    winning_scores.push(score);
+                }
+            }
+        }
+
+        if winning_scores.len() > 0 {
+            let result = *winning_scores.last().unwrap();
+            return result;
+        }
+
+        // If this is returned, there was no winner (this won't happen)
+        -1
+    }
+}
+
 struct BingoBoard {
     pub number_grid: Vec<Vec<i32>>,
     pub marked_grid: Vec<Vec<Cell<bool>>>,
+    pub won: Cell<bool>,
 }
 
 impl BingoBoard {
@@ -98,6 +134,7 @@ impl BingoBoard {
                 if *self.number_grid.index(y).index(x) == number {
                     self.marked_grid.index(y).index(x).set(true);
                     if self.check_won(x, y) {
+                        self.won.set(true);
                         return true;
                     }
                 }
