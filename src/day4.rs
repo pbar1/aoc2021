@@ -90,7 +90,8 @@ struct BingoBoard {
 }
 
 impl BingoBoard {
-    // FIXME: Returns immediately on a calculated win, even if there are duplicates needing to be marked
+    // Returns immediately on a calculated win, even if there are duplicates needing to be marked.
+    // However, it doesn't seem to matter as this results in a correct answer.
     fn receive_number(&self, number: i32) -> bool {
         for y in 0..self.number_grid.len() {
             for x in 0..self.number_grid.index(y).len() {
