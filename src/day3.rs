@@ -1,4 +1,4 @@
-use std::ops::{Deref, Index};
+use std::ops::Index;
 
 use crate::util;
 
@@ -18,7 +18,7 @@ pub fn part1() {
             } else {
                 state_val -= 1;
             }
-            std::mem::replace(&mut state[i], state_val);
+            let _ = std::mem::replace(&mut state[i], state_val);
         }
     }
 

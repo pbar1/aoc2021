@@ -1,7 +1,5 @@
 use std::{cell::Cell, fs, ops::Index, path::Path};
 
-use crate::util;
-
 pub fn part1() {
     let filename = "./input/day4.txt";
     let bingo_game = read_bingo(filename);
@@ -51,7 +49,7 @@ where
         let width = number_grid.index(0).len();
         let marked_grid = vec![vec![Cell::new(false); width]; height];
 
-        let mut board = BingoBoard {
+        let board = BingoBoard {
             number_grid,
             marked_grid,
             won: Cell::new(false),
