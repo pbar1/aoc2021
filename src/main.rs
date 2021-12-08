@@ -21,30 +21,20 @@ fn main() {
         (day7::part1, day7::part2),
     ];
 
-    for i in 0..parts.len() {
-        let (part1, part2) = *parts.index(i);
+    println!("PART RESULT MICROS");
+    for day in 0..parts.len() {
+        let (part1, part2) = *parts.index(day);
+        let part_vec = vec![part1, part2];
 
-        let filename = format!("./input/day{}.txt", i + 1);
+        let filename = format!("./input/day{}.txt", day + 1);
         let input = fs::read_to_string(filename).unwrap();
 
-        let mut sw1 = Stopwatch::start_new();
-        let part1_result = part1(&input);
-        let part1_elapsed = sw1.elapsed();
-        println!(
-            "Day {}, Part 1: {}   ({:?})",
-            i + 1,
-            part1_result,
-            part1_elapsed
-        );
-
-        let mut sw2 = Stopwatch::start_new();
-        let part2_result = part2(&input);
-        let part2_elapsed = sw2.elapsed();
-        println!(
-            "Day {}, Part 2: {}   ({:?})",
-            i + 1,
-            part2_result,
-            part2_elapsed
-        );
+        for p in 0..part_vec.len() {
+            let part = *part_vec.index(p);
+            let sw = Stopwatch::start_new();
+            let result = part(&input);
+            let elapsed = sw.elapsed().as_micros();
+            println!("{}-{} {} {}", day + 1, p + 1, result, elapsed);
+        }
     }
 }
