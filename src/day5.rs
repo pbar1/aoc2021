@@ -1,9 +1,6 @@
-use std::{cell::Cell, fs, ops::Index};
+use std::{cell::Cell, ops::Index};
 
-pub fn part1() {
-    let filename = "./input/day5.txt";
-    let input = fs::read_to_string(filename).unwrap();
-
+pub fn part1(input: &String) -> i64 {
     // Only horizontal and vertical vents are in scope for part 1
     let segments = parse_line_segments(input)
         .into_iter()
@@ -12,22 +9,19 @@ pub fn part1() {
 
     let result = calculate_overlaps(segments);
 
-    println!("day5part1: {}", result);
+    result as i64
 }
 
-pub fn part2() {
-    let filename = "./input/day5.txt";
-    let input = fs::read_to_string(filename).unwrap();
-
+pub fn part2(input: &String) -> i64 {
     // Diagonals are in scope for part 2
     let segments = parse_line_segments(input);
 
     let result = calculate_overlaps(segments);
 
-    println!("day5part2: {}", result);
+    result as i64
 }
 
-fn parse_line_segments(input: String) -> Vec<LineSegment> {
+fn parse_line_segments(input: &String) -> Vec<LineSegment> {
     let segments: Vec<LineSegment> = input
         .lines()
         .map(|line| {

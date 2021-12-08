@@ -1,31 +1,25 @@
-use std::{cell::Cell, fs, ops::Index, path::Path};
+use std::{cell::Cell, ops::Index};
 
-pub fn part1() {
-    let filename = "./input/day4.txt";
-    let bingo_game = read_bingo(filename);
+pub fn part1(input: &String) -> i64 {
+    let bingo_game = read_bingo(input);
 
     let result = bingo_game.first_winner_score();
 
-    println!("day4part1: {}", result);
+    result as i64
 }
 
-pub fn part2() {
-    let filename = "./input/day4.txt";
-    let bingo_game = read_bingo(filename);
+pub fn part2(input: &String) -> i64 {
+    let bingo_game = read_bingo(input);
 
     let result = bingo_game.last_winner_score();
 
-    println!("day4part2: {}", result);
+    result as i64
 }
 
-// Split contents of input file by double newline. First match is the list of
-// numbers, remaining matches are the bingo boards.
-fn read_bingo<P>(filename: P) -> BingoGame
-where
-    P: AsRef<Path>,
-{
-    let contents = fs::read_to_string(filename).unwrap();
-    let splits: Vec<&str> = contents.split("\n\n").collect();
+// Split contents of input by double newline. First match is the list of numbers,
+// remaining matches are the bingo boards.
+fn read_bingo(input: &String) -> BingoGame {
+    let splits: Vec<&str> = input.split("\n\n").collect();
 
     let numbers: Vec<i32> = splits
         .index(0)

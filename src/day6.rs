@@ -1,28 +1,22 @@
-use std::fs;
+pub fn part1(input: &String) -> i64 {
+    let result = simulate(input, 80);
 
-pub fn part1() {
-    let filename = "./input/day6.txt";
-
-    let result = simulate(filename, 80);
-
-    println!("day6part1: {}", result);
+    result as i64
 }
 
-pub fn part2() {
-    let filename = "./input/day6.txt";
+pub fn part2(input: &String) -> i64 {
+    let result = simulate(input, 256);
 
-    let result = simulate(filename, 256);
-
-    println!("day6part2: {}", result);
+    result as i64
 }
 
-fn simulate(filename: &str, days: i32) -> u64 {
+fn simulate(input: &String, days: i32) -> u64 {
     let mut age_counts = [0u64; 9];
-    fs::read_to_string(filename)
-        .unwrap()
+
+    input
         .trim()
         .split(',')
-        .map(|s| s.parse::<usize>().unwrap())
+        .map(|s| s.trim().parse::<usize>().unwrap())
         .for_each(|age| age_counts[age] += 1);
 
     for _ in 0..days {

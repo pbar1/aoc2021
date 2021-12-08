@@ -1,33 +1,35 @@
 use std::ops::Index;
 
-use crate::util;
+pub fn part1(input: &String) -> i64 {
+    let nums: Vec<i32> = input
+        .lines()
+        .map(|line| line.parse::<i32>().unwrap())
+        .collect();
 
-pub fn part1() {
-    let filename = "./input/day1.txt";
-    let v = util::read_ints(filename);
-
-    let mut count = 0;
-    for i in 1..v.len() {
-        if v.index(i) > v.index(i - 1) {
-            count += 1;
+    let mut result = 0;
+    for i in 1..nums.len() {
+        if nums.index(i) > nums.index(i - 1) {
+            result += 1;
         }
     }
 
-    println!("day1part1: {}", count);
+    result
 }
 
-pub fn part2() {
-    let filename = "./input/day1.txt";
-    let v = util::read_ints(filename);
+pub fn part2(input: &String) -> i64 {
+    let nums: Vec<i32> = input
+        .lines()
+        .map(|line| line.parse::<i32>().unwrap())
+        .collect();
 
-    let mut count = 0;
-    for i in 3..v.len() {
-        let sum_a = v.index(i - 3) + v.index(i - 2) + v.index(i - 1);
-        let sum_b = v.index(i - 2) + v.index(i - 1) + v.index(i);
+    let mut result = 0;
+    for i in 3..nums.len() {
+        let sum_a = nums.index(i - 3) + nums.index(i - 2) + nums.index(i - 1);
+        let sum_b = nums.index(i - 2) + nums.index(i - 1) + nums.index(i);
         if sum_b > sum_a {
-            count += 1;
+            result += 1;
         }
     }
 
-    println!("day1part2: {}", count);
+    result
 }

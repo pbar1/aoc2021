@@ -1,10 +1,7 @@
 use std::ops::Index;
 
-use crate::util;
-
-pub fn part1() {
-    let filename = "./input/day3.txt";
-    let v = util::read_strings(filename);
+pub fn part1(input: &String) -> i64 {
+    let v: Vec<String> = input.lines().map(|s| s.to_string()).collect();
 
     let size = v.index(0).len();
     let mut state = vec![0; size];
@@ -42,7 +39,7 @@ pub fn part1() {
 
     let result = gamma * epsilon;
 
-    println!("day3part1: {}", result);
+    result as i64
 }
 
 // When calculating the CO2 number: what happens if all of the digits in the current column are the
@@ -51,10 +48,9 @@ pub fn part1() {
 //   0
 // The least common number is 0, which with the algorithm below would result in filtering the list
 // down to no elements. Should 0 just be the least common, instead of inverting to 1?
-pub fn part2() {
-    let filename = "./input/day3.txt";
-    let mut oxygen_input = util::read_strings(filename);
-    let mut co2_input = util::read_strings(filename);
+pub fn part2(input: &String) -> i64 {
+    let mut oxygen_input: Vec<String> = input.lines().map(|s| s.to_string()).collect();
+    let mut co2_input: Vec<String> = input.lines().map(|s| s.to_string()).collect();
 
     let size = oxygen_input.index(0).len();
 
@@ -127,5 +123,5 @@ pub fn part2() {
 
     let result = oxygen * co2;
 
-    println!("day3part2: {}", result);
+    result as i64
 }
