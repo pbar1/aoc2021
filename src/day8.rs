@@ -1,10 +1,4 @@
-use std::{
-    cmp::Ordering,
-    collections::{HashMap, HashSet},
-    hash::Hash,
-    ops::Index,
-    str::Chars,
-};
+use std::collections::HashMap;
 
 use itertools::Itertools;
 
@@ -28,131 +22,139 @@ pub fn part1(input: &String) -> i64 {
 }
 
 pub fn part2(input: &String) -> i64 {
+    let mut result = 0;
+
     for line in input.lines() {
         let mut split = line.split(" | ");
 
-        let mut observed: Vec<String> = split
+        let signals: Vec<String> = split
             .next()
             .unwrap()
             .split_whitespace()
-            .map(|s| s.chars().sorted().collect::<String>())
+            .map(|s| s.chars().sorted().collect())
             .collect();
-        observed.sort_by(|a, b| {
-            if a.len() < b.len() {
-                Ordering::Less
-            } else {
-                Ordering::Greater
-            }
-        });
+        let dec = CharDecoder::from(signals);
 
-        // FIXME: What you are about to witness is some witchcraft.
-        let mut map = HashMap::new();
-        map.insert(observed.index(0), '1'); // length 2 is "1"
-        map.insert(observed.index(1), '7'); // length 3 is "7"
-        map.insert(observed.index(2), '4'); // length 4 is "4"
-        map.insert(observed.index(9), '8'); // length 7 is "8"
-        let mut remaining_fives = Vec::new();
-        'outer: for i in 3..=5 {
-            for c in observed.index(0).chars() {
-                if !observed.index(i).contains(c) {
-                    continue 'outer;
-                }
-            }
-            map.insert(observed.index(i), '3');
-            for j in 3..=5 {
-                if j != i {
-                    remaining_fives.push(observed.index(j));
-                }
-            }
-        }
-        let mut remaining_sixes = Vec::new();
-        let mut six_index = 0;
-        for i in 6..=8 {
-            for c in observed.index(0).chars() {
-                if !observed.index(i).contains(c) {
-                    map.insert(observed.index(i), '6');
-                    six_index = i;
-                    break;
-                } else {
-                    remaining_sixes.push(observed.index(i));
-                }
-            }
-        }
-        for rem in &remaining_sixes {
-            for c in observed.index(2).chars() {
-                if !rem.contains(c) {
-                    map.insert(rem, '8');
-                }
-            }
-        }
-        for rem in &remaining_sixes {
-            if !map.contains_key(rem) {
-                map.insert(rem, '9');
-            }
-        }
-        for rem in &remaining_fives {
-            for c in a_not_b(observed.index(9), observed.index(six_index)).chars() {
-                if !rem.contains(c) {
-                    map.insert(rem, '5');
-                }
-            }
-        }
-        for rem in &remaining_fives {
-            if !map.contains_key(rem) {
-                map.insert(rem, '2');
-            }
-        }
-
-        let output: Vec<char> = split
+        let display: Vec<String> = split
             .next()
             .unwrap()
             .split_whitespace()
-            .map(|s| s.chars().sorted().collect::<String>())
-            .map(|s| *map.get(&s).unwrap())
+            .map(|s| s.chars().sorted().collect())
             .collect();
+        let decoded = dec.translate(display);
 
-        let o: String = output.into_iter().collect();
+        result += decoded;
     }
 
-    println!("{:?}", "foo");
-    -1
+    result as i64
 }
 
-// If there is exactly one matching element, remove and return it. Else panic.
-fn remove_only<T, F>(input: &mut Vec<T>, predicate: F) -> T
-where
-    T: Clone,
-    F: Fn(&&T) -> bool + Copy,
-{
-    let mut results = input.iter().filter(predicate);
-    let result = results.next().expect("no element found").clone();
-    assert!(results.next().is_none(), "multiple elements found");
-
-    // Vec::drain_filter would be useful here, but don't want to depend on nighly.
-    input.retain(|x| !predicate(&x));
-
-    result
+struct CharDecoder {
+    map: HashMap<String, char>,
 }
 
-fn decode(input: &mut Vec<HashSet<char>>) -> [HashSet<char>; 10] {
-    // Easy cases.
-    let n1 = remove_only(input, |x| x.len() == 2);
-    let n4 = remove_only(input, |x| x.len() == 4);
-    let n7 = remove_only(input, |x| x.len() == 3);
-    let n8 = remove_only(input, |x| x.len() == 7);
+impl From<Vec<String>> for CharDecoder {
+    fn from(signals: Vec<String>) -> Self {
+        let mut map = HashMap::new();
+        let mut len_fives = Vec::new();
+        let mut len_sixes = Vec::new();
+        let mut seven = String::from("");
+        let mut four = String::from("");
+        let mut eight = String::from("");
+        let mut six = String::from("");
+        for s in signals {
+            match s.len() {
+                2 => {
+                    map.insert(s, '1');
+                }
+                3 => {
+                    seven = s.clone();
+                    map.insert(s, '7');
+                }
+                4 => {
+                    four = s.clone();
+                    map.insert(s, '4');
+                }
+                7 => {
+                    eight = s.clone();
+                    map.insert(s, '8');
+                }
+                5 => len_fives.push(s),
+                6 => len_sixes.push(s),
+                _ => panic!("won't happen"),
+            };
+        }
 
-    // 3 is the only 5-segment digit that shares 2 segments with digit 1.
-    let n3 = remove_only(input, |x| x.len() == 5 && (*x & &n1).len() == 2);
-    let n2 = remove_only(input, |x| x.len() == 5 && (*x & &n4).len() == 2);
-    // 5 is the only remaining 5-segment digit.
-    let n5 = remove_only(input, |x| x.len() == 5);
+        let mut remaining_len_fives = Vec::new();
+        for s in len_fives {
+            let mut contains: Vec<bool> = Vec::new();
+            for c in seven.chars() {
+                contains.push(s.contains(c));
+            }
+            if contains.iter().all(|b| *b) {
+                map.insert(s, '3');
+            } else {
+                remaining_len_fives.push(s);
+            }
+        }
 
-    // And so on.
-    let n6 = remove_only(input, |x| x.len() == 6 && (*x & &n1).len() == 1);
-    let n9 = remove_only(input, |x| x.len() == 6 && (*x & &n4).len() == 4);
-    let n0 = remove_only(input, |x| x.len() == 6);
+        let mut remaining_len_sixes = Vec::new();
+        for s in len_sixes {
+            let mut contains: Vec<bool> = Vec::new();
+            for c in four.chars() {
+                contains.push(s.contains(c));
+            }
+            if contains.iter().all(|b| *b) {
+                map.insert(s, '9');
+            } else {
+                remaining_len_sixes.push(s);
+            }
+        }
 
-    assert!(input.is_empty());
+        for s in remaining_len_sixes {
+            let mut contains: Vec<bool> = Vec::new();
+            for c in seven.chars() {
+                contains.push(s.contains(c));
+            }
+            if contains.iter().all(|b| *b) {
+                map.insert(s, '0');
+            } else {
+                six = s.clone();
+                map.insert(s, '6');
+            }
+        }
 
-    [n0, n1, n2, n3, n4, n5, n6, n7, n8, n9]
+        // construct set of 8 - 6
+        let mut eight_minus_six = Vec::new();
+        for c in eight.chars() {
+            if !six.contains(c) {
+                eight_minus_six.push(c);
+            }
+        }
+
+        for s in remaining_len_fives {
+            let mut contains: Vec<bool> = Vec::new();
+            for c in &eight_minus_six {
+                contains.push(s.contains(*c));
+            }
+            if contains.iter().all(|b| *b) {
+                map.insert(s, '2');
+            } else {
+                map.insert(s, '5');
+            }
+        }
+
+        CharDecoder { map }
+    }
+}
+
+impl CharDecoder {
+    fn translate(&self, display: Vec<String>) -> i32 {
+        let chars: Vec<char> = display
+            .iter()
+            .map(|s| *self.map.get(s.as_str()).unwrap())
+            .collect();
+        let digits: String = chars.iter().collect();
+        digits.parse::<i32>().unwrap()
+    }
 }
